@@ -1,4 +1,3 @@
-
 var selector = document.querySelector(".selector_box");
 selector.addEventListener('click', () => {
     if (selector.classList.contains("selector_open")){
@@ -43,38 +42,59 @@ upload.addEventListener('click', () => {
     upload.classList.remove("error_shown")
 });
 
+
+// =======================
+//   CLOUDINARY UPLOAD
+// =======================
 imageInput.addEventListener('change', (event) => {
 
     upload.classList.remove("upload_loaded");
     upload.classList.add("upload_loading");
-
     upload.removeAttribute("selected")
 
     var file = imageInput.files[0];
-    var data = new FormData();
-    data.append("image", file);
 
-    fetch('	https://api.imgur.com/3/image' ,{
-        method: 'POST',
-        headers: {
-            'Authorization': 'Client-ID c8c28d402435402'
-        },
+    var data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "obymojmak");
+    data.append("cloud_name", "dognlq1n2");
+
+    fetch(`https://api.cloudinary.com/v1_1/dognlq1n2/image/upload`, {
+        method: "POST",
         body: data
     })
-    .then(result => result.json())
+    .then(res => res.json())
     .then(response => {
-        
-        var url = response.data.link;
+
+        const url = response.secure_url;
+
+        if (!url) {
+            console.error("Cloudinary upload error:", response);
+            upload.classList.add("error_shown");
+            upload.classList.remove("upload_loading");
+            alert("Błąd uploadu Cloudinary!");
+            return;
+        }
+
         upload.classList.remove("error_shown")
         upload.setAttribute("selected", url);
         upload.classList.add("upload_loaded");
         upload.classList.remove("upload_loading");
         upload.querySelector(".upload_uploaded").src = url;
-
     })
+    .catch(err => {
+        console.error("Upload error:", err);
+        upload.classList.add("error_shown");
+        upload.classList.remove("upload_loading");
+        alert("Błąd połączenia z Cloudinary.");
+    });
 
-})
+});
 
+
+// =======================
+//        FORM LOGIC
+// =======================
 document.querySelector(".go").addEventListener('click', () => {
 
     var empty = [];
@@ -143,6 +163,11 @@ function forwardToId(params){
 
 }
 
+
+
+// =======================
+//       GUIDE PANEL
+// =======================
 var guide = document.querySelector(".guide_holder");
 guide.addEventListener('click', () => {
 
